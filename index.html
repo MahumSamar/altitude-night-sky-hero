@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Altitude — A light on the mountain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400&family=Geist:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --serif:"Newsreader","Iowan Old Style","Times New Roman",serif;
+    --sans:"Geist","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --line:rgba(255,255,255,.14);
+    --nav-h:44px;
+    --panel-h:max(158px,18.2vh);
+    --pad:12px;
+    --ease:cubic-bezier(.22,.8,.2,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#050b18}
+  body{font-family:var(--sans);color:#fff;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+
+  /* ---------- section ---------- */
+  .hero{
+    position:relative;
+    height:100vh;
+    height:100svh;
+    min-height:560px;
+    overflow:hidden;
+    isolation:isolate;
+    background:#050b18 url("https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_065832_af705837-5137-4245-9dc6-ed4aaccfa74f.png") center/cover no-repeat;
+  }
+
+  /* ---------- background video (two layers cross-fade for a seamless loop) ---------- */
+  .bg{position:absolute;inset:0;z-index:-3}
+  .bg video{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;object-position:center;
+    opacity:0;transition:opacity .9s linear;
+  }
+  .bg video.is-on{opacity:1}
+  .shade{
+    position:absolute;inset:0;z-index:-2;pointer-events:none;
+    background:
+      linear-gradient(180deg,rgba(4,9,22,.42) 0%,rgba(4,9,22,.12) 22%,rgba(4,9,22,.10) 60%,rgba(4,9,22,.35) 100%);
+  }
+
+  /* liquid cursor trail */
+  #liquid{
+    position:absolute;inset:0;width:100%;height:100%;z-index:-1;
+    pointer-events:none;mix-blend-mode:screen;
+    filter:url(#liquidFilter);opacity:.95;
+  }
+
+  /* intro iris */
+  .iris{
+    position:absolute;inset:-25%;z-index:6;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(10,44,110,0) 62%,rgba(10,44,110,.92) 82%,#0a2c6e 100%);
+    animation:iris 1.5s var(--ease) .05s both;
+  }
+  @keyframes iris{
+    from{transform:scale(.98);opacity:1}
+    to{transform:scale(1.9);opacity:0}
+  }
+
+  /* vertical guide lines */
+  .guide{
+    position:absolute;top:var(--nav-h);bottom:0;width:1px;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.07));
+    transform-origin:top;animation:grow 1.6s var(--ease) .5s both;
+  }
+  .guide.l{left:17.3%}
+  .guide.r{right:17.3%}
+  @keyframes grow{from{transform:scaleY(0);opacity:0}to{transform:scaleY(1);opacity:1}}
+
+  /* ---------- nav ---------- */
+  .nav{
+    position:absolute;top:0;left:0;right:0;height:var(--nav-h);z-index:5;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    padding:0 var(--pad);
+  }
+  .nav::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);
+    transform-origin:center;animation:rule 1.4s var(--ease) .15s both;
+  }
+  @keyframes rule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .nav ul{display:flex;gap:55px;list-style:none;font-size:14.5px;letter-spacing:.005em;line-height:1}
+  .nav ul:last-child{justify-content:flex-end}
+  .nav li{animation:fade .9s ease .55s both}
+  .nav a{opacity:.96;transition:opacity .25s}
+  .nav a:hover{opacity:.6}
+  .brand{
+    font-family:var(--serif);font-weight:400;font-size:16px;letter-spacing:.02em;text-transform:uppercase;
+    line-height:1;transform:translateY(-2px);animation:fade .9s ease .1s both;
+  }
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* ---------- centre ---------- */
+  .center{
+    position:absolute;left:0;right:0;top:var(--nav-h);bottom:var(--panel-h);z-index:3;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:0 20px;text-align:center;
+  }
+  h1{
+    font-family:var(--serif);font-weight:300;
+    font-size:clamp(33px,4.7vw,84px);
+    line-height:1.07;letter-spacing:.01em;
+    font-variation-settings:"opsz" 60;
+    text-wrap:balance;
+  }
+  h1 .ln{display:block}
+  h1 .w{
+    display:inline-block;color:#fff;
+    opacity:0;filter:blur(14px);transform:translateY(4px);
+    animation:word 1.1s var(--ease) both;
+    animation-delay:calc(.35s + var(--i) * .16s);
+    text-shadow:0 0 28px rgba(8,16,40,.35);
+    will-change:filter,opacity;
+  }
+  @keyframes word{to{opacity:1;filter:blur(0);transform:none}}
+
+  .form{
+    margin-top:clamp(18px,2.6vh,26px);
+    width:min(470px,100%);height:46px;
+    display:flex;align-items:center;
+    padding:2px;border-radius:999px;
+    background:linear-gradient(180deg,rgba(40,58,96,.34),rgba(14,24,48,.30));
+    border:1px solid rgba(255,255,255,.24);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 8px 30px rgba(2,6,18,.25);
+    -webkit-backdrop-filter:blur(10px) saturate(130%);
+    backdrop-filter:blur(10px) saturate(130%);
+    opacity:0;filter:blur(12px);transform:translateY(8px);
+    animation:word 1.1s var(--ease) 1.75s both;
+  }
+  .form input{
+    flex:1 1 0;min-width:0;height:100%;
+    background:none;border:0;outline:0;color:#fff;
+    font:400 14.5px/1 var(--sans);
+    padding:0 0 0 27px;
+  }
+  .form input + input{padding-left:14px}
+  .form input::placeholder{color:rgba(255,255,255,.95);opacity:1}
+  .form input:focus::placeholder{color:rgba(255,255,255,.45)}
+  .send{
+    flex:0 0 128px;height:100%;
+    border:1px solid rgba(255,255,255,.55);border-radius:999px;cursor:pointer;
+    font:400 17px/1 var(--serif);color:#1b2233;letter-spacing:.01em;
+    background:linear-gradient(90deg,#f4dfae 0%,#ecdcbb 38%,#c3d0e2 72%,#a6c1e6 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 0 1px rgba(10,20,45,.35);
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    transition:filter .25s,transform .25s;
+  }
+  .send::after{content:"";width:4px;height:4px;border-radius:50%;background:currentColor;transform:translateY(1px);transition:transform .3s var(--ease)}
+  .send:hover{filter:brightness(1.06)}
+  .send:hover::after{transform:translate(3px,1px)}
+  .send:active{transform:scale(.98)}
+
+  /* ---------- bottom panel ---------- */
+  .panel{
+    position:absolute;left:0;right:0;bottom:0;height:var(--panel-h);z-index:4;
+    display:grid;grid-template-columns:1fr minmax(0,540px) 1fr;
+    padding:26px var(--pad) 24px;
+    border-top:1px solid var(--line);
+    background:
+      radial-gradient(60% 120% at 65% 0%,rgba(150,92,30,.30),rgba(150,92,30,0) 70%),
+      linear-gradient(180deg,rgba(26,18,10,.62),rgba(10,8,8,.80));
+    -webkit-backdrop-filter:blur(26px) saturate(125%);
+    backdrop-filter:blur(26px) saturate(125%);
+    opacity:0;transform:translateY(100%);filter:blur(10px);
+    animation:panel 1.3s var(--ease) 1.5s both;
+  }
+  @keyframes panel{to{opacity:1;transform:none;filter:blur(0)}}
+  .stat{display:flex;flex-direction:column;justify-content:space-between}
+  .stat.r{text-align:right;align-items:flex-end}
+  .stat b{font:400 21px/1.1 var(--serif);letter-spacing:.005em}
+  .stat span{font-size:14.5px;line-height:1.2;color:rgba(255,255,255,.82)}
+  .about{text-align:center;display:flex;flex-direction:column;align-items:center}
+  .about h2{font:400 21px/1.1 var(--serif);letter-spacing:.005em}
+  .about i{display:block;width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.35);margin:14px 0 auto}
+  .about p{
+    font-size:14.5px;line-height:1.26;color:rgba(255,255,255,.78);
+    opacity:0;filter:blur(8px);animation:word 1.2s var(--ease) 2.3s both;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .nav ul{gap:28px}
+    .guide.l{left:8%}.guide.r{right:8%}
+  }
+  @media (max-width:640px){
+    :root{--panel-h:auto;--pad:16px}
+    .nav ul{gap:16px;font-size:13.5px}
+    .brand{font-size:14.5px}
+    .guide{display:none}
+    .center{bottom:0;padding:0 16px 228px}
+    h1{font-size:clamp(31px,9.4vw,44px);line-height:1.14}
+    .form{height:48px}
+    .form input{font-size:16px;padding-left:20px}
+    .form input + input{padding-left:8px}
+    .send{flex-basis:98px;font-size:16px}
+    .panel{
+      grid-template-columns:1fr 1fr;grid-template-areas:"about about" "l r";
+      row-gap:18px;padding:20px var(--pad) max(18px,env(safe-area-inset-bottom));
+    }
+    .about{grid-area:about}
+    .about i{margin:10px 0}
+    .about p{font-size:13.5px;line-height:1.35;max-width:36ch}
+    .about p br{display:none}
+    .stat{gap:4px}
+    .stat.l{grid-area:l}.stat.r{grid-area:r}
+    .stat b{font-size:20px}
+    .stat span{font-size:13px}
+  }
+  @media (max-width:380px){
+    .nav ul{gap:12px;font-size:12.5px}
+    .form input{padding-left:16px}
+    .send{flex-basis:84px}
+  }
+  @media (max-height:620px) and (min-width:641px){
+    :root{--panel-h:132px}
+    .panel{padding:16px var(--pad) 14px}
+    .about i{margin:8px 0 auto}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important}
+    #liquid{display:none}
+  }
+</style>
+</head>
+<body>
+
+<section class="hero" id="hero">
+  <div class="bg" aria-hidden="true">
+    <video class="is-on" muted playsinline autoplay preload="auto"
+      poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_065832_af705837-5137-4245-9dc6-ed4aaccfa74f.png"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_065941_38b8d706-9c3d-41c0-ada3-c2cafcc8f35b.mp4"></video>
+    <video muted playsinline preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_065941_38b8d706-9c3d-41c0-ada3-c2cafcc8f35b.mp4"></video>
+  </div>
+  <div class="shade" aria-hidden="true"></div>
+  <canvas id="liquid" aria-hidden="true"></canvas>
+  <span class="guide l" aria-hidden="true"></span>
+  <span class="guide r" aria-hidden="true"></span>
+  <div class="iris" aria-hidden="true"></div>
+
+  <header class="nav">
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Stays</a></li>
+    </ul>
+    <a class="brand" href="#">Altitude</a>
+    <ul>
+      <li><a href="#">Journal</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </header>
+
+  <div class="center">
+    <h1 id="headline" aria-label="A light on the mountain, kept on just for you.">
+      <span class="ln">A light on the mountain,</span>
+      <span class="ln">kept on just for you.</span>
+    </h1>
+    <form class="form" onsubmit="event.preventDefault()">
+      <input type="text" name="name" placeholder="Name" aria-label="Name" autocomplete="name">
+      <input type="email" name="email" placeholder="Email" aria-label="Email" autocomplete="email">
+      <button class="send" type="submit">Send</button>
+    </form>
+  </div>
+
+  <footer class="panel">
+    <div class="stat l"><b>240+</b><span>Stays scouted</span></div>
+    <div class="about">
+      <h2>Stays worth the climb</h2>
+      <i></i>
+      <p>Hearth finds the cabins and lodges that sit where the road runs out —<br>
+      no neighbors, no noise, just a warm room and a sky you forgot existed.<br>
+      Every stay is scouted in person, so all you have to do is arrive.</p>
+    </div>
+    <div class="stat r"><b>60K</b><span>Nights off-grid</span></div>
+  </footer>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="liquidFilter" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011 0.016" numOctaves="3" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="38" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+</section>
+
+<script>
+(() => {
+  const hero = document.getElementById('hero');
+
+  /* ---- headline: split into words, blur-in stagger, white → dusk-blue fade across each line ---- */
+  const h1 = document.getElementById('headline');
+  let i = 0;
+  h1.querySelectorAll('.ln').forEach(ln => {
+    const words = ln.textContent.trim().split(/\s+/);
+    ln.textContent = '';
+    words.forEach((t, k) => {
+      const s = document.createElement('span');
+      s.className = 'w'; s.textContent = t; s.style.setProperty('--i', i++);
+      s.setAttribute('aria-hidden', 'true');
+      ln.append(s, k < words.length - 1 ? ' ' : '');
+    });
+  });
+  const tint = () => {
+    const r = h1.getBoundingClientRect();
+    h1.querySelectorAll('.w').forEach(w => {
+      const b = w.getBoundingClientRect();
+      const t = Math.min(1, Math.max(0, ((b.left + b.width / 2) - r.left) / r.width));
+      const k = Math.pow(t, 1.5);
+      const mix = (a, z) => Math.round(a + (z - a) * k);
+      w.style.color = `rgba(${mix(255,146)},${mix(255,160)},${mix(255,196)},${(1 - .08 * k).toFixed(3)})`;
+    });
+  };
+  tint();
+  addEventListener('resize', tint);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(tint);
+
+  /* ---- background video: cross-fade two copies so the loop never pops ---- */
+  const vids = [...hero.querySelectorAll('.bg video')];
+  const FADE = 0.9;
+  let cur = 0, swapping = false;
+  const tick = () => {
+    const a = vids[cur], b = vids[1 - cur];
+    if (!swapping && a.duration && a.currentTime >= a.duration - FADE - 0.05) {
+      swapping = true;
+      b.currentTime = 0;
+      const p = b.play(); if (p) p.catch(() => {});
+      b.classList.add('is-on'); a.classList.remove('is-on');
+      setTimeout(() => { a.pause(); cur = 1 - cur; swapping = false; }, FADE * 1000 + 60);
+    }
+    requestAnimationFrame(tick);
+  };
+  vids[0].addEventListener('ended', () => { vids[0].currentTime = 0; vids[0].play().catch(() => {}); });
+  vids[1].addEventListener('ended', () => { vids[1].currentTime = 0; vids[1].play().catch(() => {}); });
+  const kick = () => vids[cur].play().catch(() => {});
+  kick(); addEventListener('touchstart', kick, { once: true, passive: true });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); });
+  requestAnimationFrame(tick);
+
+  /* ---- liquid cursor trail ---- */
+  const cv = document.getElementById('liquid');
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const calm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (!fine || calm) { cv.remove(); return; }
+  const ctx = cv.getContext('2d');
+  const SCALE = 0.5;
+  let W = 0, H = 0;
+  const size = () => {
+    W = hero.clientWidth; H = hero.clientHeight;
+    cv.width = Math.round(W * SCALE); cv.height = Math.round(H * SCALE);
+  };
+  size(); addEventListener('resize', size);
+
+  const pts = [];
+  let last = null, live = false;
+  hero.addEventListener('pointermove', e => {
+    const r = hero.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    if (last) {
+      const d = Math.hypot(x - last.x, y - last.y);
+      const n = Math.min(8, Math.ceil(d / 14));
+      for (let s = 1; s <= n; s++) {
+        pts.push({ x: last.x + (x - last.x) * s / n, y: last.y + (y - last.y) * s / n,
+                   vx: (x - last.x) * .012, vy: (y - last.y) * .012 - .12, life: 1, r: 46 + Math.min(54, d * 1.1) });
+      }
+    }
+    last = { x, y };
+    if (!live) { live = true; requestAnimationFrame(draw); }
+  });
+  hero.addEventListener('pointerleave', () => { last = null; });
+
+  function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (let k = pts.length - 1; k >= 0; k--) {
+      const p = pts[k];
+      p.life -= 0.012; p.x += p.vx; p.y += p.vy; p.vx *= .97; p.vy *= .97; p.r += .55;
+      if (p.life <= 0) { pts.splice(k, 1); continue; }
+      const a = p.life * p.life * .2;
+      const g = ctx.createRadialGradient(p.x * SCALE, p.y * SCALE, 0, p.x * SCALE, p.y * SCALE, p.r * SCALE);
+      g.addColorStop(0, `rgba(232,224,150,${a * 1.25})`);
+      g.addColorStop(.55, `rgba(120,172,206,${a * .6})`);
+      g.addColorStop(1, 'rgba(90,140,200,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x * SCALE, p.y * SCALE, p.r * SCALE, 0, 6.2832); ctx.fill();
+    }
+    if (pts.length > 260) pts.splice(0, pts.length - 260);
+    if (pts.length) requestAnimationFrame(draw); else live = false;
+  }
+})();
+</script>
+</body>
+</html>
